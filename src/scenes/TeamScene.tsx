@@ -3,6 +3,7 @@ import {PlayerMarker} from '../components/PlayerMarker';
 import {PositionGroupReveal} from '../components/PositionGroupReveal';
 import {optimizeFormation} from '../data/formation';
 import {teamBackgrounds} from '../data/lineup-backgrounds';
+import {playerLineupAsset} from '../data/player-assets';
 import {HEEBO_FONT} from '../fonts';
 import {
   CENTER_BACK_START,
@@ -62,8 +63,7 @@ const SubstituteOverlay: React.FC<{players: Player[]; team: Team}> = ({players, 
       </div>
       <div style={{display: 'flex', gap: 14}}>
         {players.map((player) => {
-          const source = player.lineupStatic ?? player.poster ?? player.image;
-          const initial = player.name.slice(0, 1);
+          const source = playerLineupAsset(player);
 
           return (
             <div key={player.playerId ?? player.name} style={{width: 178, textAlign: 'center'}}>
@@ -80,23 +80,7 @@ const SubstituteOverlay: React.FC<{players: Player[]; team: Team}> = ({players, 
                   boxShadow: `0 16px 34px rgba(0,0,0,0.5), 0 0 26px ${team.color}75`,
                 }}
               >
-                {source ? (
-                  <Img src={staticFile(source)} style={{width: '100%', height: '100%', objectFit: 'cover'}} />
-                ) : (
-                  <div
-                    style={{
-                      width: '100%',
-                      height: '100%',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      fontSize: 82,
-                      fontWeight: 900,
-                    }}
-                  >
-                    {initial}
-                  </div>
-                )}
+                <Img src={staticFile(source)} style={{width: '100%', height: '100%', objectFit: 'cover'}} />
               </div>
               <div
                 style={{

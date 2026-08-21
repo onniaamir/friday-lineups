@@ -1,6 +1,7 @@
 import {Video} from '@remotion/media';
 import {AbsoluteFill, Easing, Img, interpolate, staticFile, useCurrentFrame} from 'remotion';
 import type {PitchBounds} from '../data/lineup-backgrounds';
+import {playerLineupAsset, playerPosterAsset} from '../data/player-assets';
 import {HEEBO_FONT} from '../fonts';
 import type {Player, Team} from '../types';
 import {MARKER_HEIGHT, MARKER_WIDTH} from './PlayerMarker';
@@ -31,11 +32,7 @@ const PosterArtwork: React.FC<{
   playLineupClip = false,
 }) => {
   const frame = useCurrentFrame();
-  const initial = player.name.replace('פלוס ', '+').slice(0, 1);
-  const darkText = team.id === 'white';
-  const stillAsset = playLineupClip
-    ? player.lineupStatic ?? player.poster ?? player.image
-    : player.poster ?? player.image;
+  const stillAsset = playLineupClip ? playerLineupAsset(player) : playerPosterAsset(player);
   const showClip = playLineupClip && player.lineupClip && frame < 73;
 
   return (
@@ -54,7 +51,7 @@ const PosterArtwork: React.FC<{
             filter: 'contrast(1.12) saturate(0.9)',
           }}
         />
-      ) : stillAsset ? (
+      ) : (
         <Img
           src={staticFile(stillAsset)}
           style={{
@@ -67,22 +64,6 @@ const PosterArtwork: React.FC<{
             filter: 'contrast(1.12) saturate(0.9)',
           }}
         />
-      ) : (
-        <div
-          style={{
-            position: 'absolute',
-            inset: 0,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            color: darkText ? '#111214' : '#ffffff',
-            background: `linear-gradient(155deg, ${team.color}, #101113 82%)`,
-            fontSize: compact ? 72 : 220,
-            fontWeight: 950,
-          }}
-        >
-          <span>{initial}</span>
-        </div>
       )}
       <div
         style={{
