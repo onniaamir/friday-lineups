@@ -1,3 +1,5 @@
+import {random} from 'remotion';
+
 export type PitchBounds = {
   left: number;
   top: number;
@@ -5,7 +7,32 @@ export type PitchBounds = {
   height: number;
 };
 
-export const matchdayBackground = 'backgrounds/lineup/matchday-background.png';
+export const matchdayBackgrounds = [
+  'backgrounds/lineup/matchday-background.png',
+  'backgrounds/lineup/matchday-background-emerald-gold.png',
+  'backgrounds/lineup/matchday-background-violet-neon.png',
+  'backgrounds/lineup/matchday-background-orange-navy.png',
+  'backgrounds/lineup/matchday-background-turquoise-burgundy.png',
+] as const;
+
+const matchdayBackgroundCycle = matchdayBackgrounds
+  .map((src) => ({src, order: random(`matchday-background:${src}`)}))
+  .sort((left, right) => left.order - right.order)
+  .map(({src}) => src);
+
+export const matchdayWeekIndex = (matchDate: string) => {
+  const match = matchDate.match(/^(\d{2})\.(\d{2})\.(\d{4})$/);
+  if (!match) {
+    return Math.floor(random(`matchday-week:${matchDate}`) * Number.MAX_SAFE_INTEGER);
+  }
+
+  const [, day, month, year] = match;
+  return Math.floor(Date.UTC(Number(year), Number(month) - 1, Number(day)) / (7 * 24 * 60 * 60 * 1000));
+};
+
+export const selectMatchdayBackground = (matchDate: string) =>
+  matchdayBackgroundCycle[matchdayWeekIndex(matchDate) % matchdayBackgroundCycle.length];
+
 export const summaryBackground = 'backgrounds/lineup/all-teams-summary-background.png';
 
 export const teamBackgrounds: Record<string, {src: string; pitchBounds: PitchBounds}> = {

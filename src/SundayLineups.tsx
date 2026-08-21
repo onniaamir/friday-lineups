@@ -17,7 +17,7 @@ import {
   totalDuration,
 } from './timing';
 
-export const SundayLineups: React.FC = () => {
+export const SundayLineups: React.FC<{variationDate?: string}> = ({variationDate}) => {
   const frame = useCurrentFrame();
   const compositionDuration = totalDuration(weeklyLineup);
   const musicDuration = compositionDuration - SILENT_SUMMARY_HOLD_DURATION;
@@ -40,7 +40,7 @@ export const SundayLineups: React.FC = () => {
         volume={musicVolume}
       />
       <Sequence from={0} durationInFrames={OPENING_DURATION} premountFor={30} name="Opening title">
-        <IntroScene />
+        <IntroScene variationDate={variationDate} />
       </Sequence>
       {weeklyLineup.teams.map((team, teamIndex) => (
         <Sequence

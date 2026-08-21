@@ -1,5 +1,6 @@
 import {AbsoluteFill, Img, staticFile} from 'remotion';
-import {matchdayBackground} from '../data/lineup-backgrounds';
+import {selectIntroLayout, type IntroPosterLayout} from '../data/intro-layouts';
+import {selectMatchdayBackground} from '../data/lineup-backgrounds';
 import {ANONYMOUS_PLAYER_ASSET, playerPosterAsset} from '../data/player-assets';
 import {weeklyLineup} from '../data/weekly-lineup';
 import {ANTON_FONT} from '../fonts';
@@ -18,14 +19,7 @@ const selectPlayer = (teamId: string) => {
 const PosterPanel: React.FC<{
   team: Team;
   player?: Player;
-  left: number;
-  top: number;
-  width: number;
-  height: number;
-  angle: number;
-  objectPosition: string;
-  zIndex: number;
-}> = ({team, player, left, top, width, height, angle, objectPosition, zIndex}) => {
+} & IntroPosterLayout> = ({team, player, left, top, width, height, angle, objectPosition, zIndex}) => {
   const source = player ? playerPosterAsset(player) : ANONYMOUS_PLAYER_ASSET;
 
   return (
@@ -69,10 +63,12 @@ const PosterPanel: React.FC<{
   );
 };
 
-export const IntroScene: React.FC = () => {
+export const IntroScene: React.FC<{variationDate?: string}> = ({variationDate = weeklyLineup.matchDate}) => {
   const blue = selectPlayer('blue');
   const white = selectPlayer('white');
   const red = selectPlayer('red');
+  const matchdayBackground = selectMatchdayBackground(variationDate);
+  const layout = selectIntroLayout(variationDate);
 
   return (
     <AbsoluteFill style={{overflow: 'hidden'}}>
@@ -84,35 +80,17 @@ export const IntroScene: React.FC = () => {
       <PosterPanel
         team={blue.team}
         player={blue.player}
-        left={35}
-        top={155}
-        width={470}
-        height={660}
-        angle={-5}
-        objectPosition="48% 50%"
-        zIndex={2}
+        {...layout.posters.blue}
       />
       <PosterPanel
         team={white.team}
         player={white.player}
-        left={575}
-        top={250}
-        width={470}
-        height={650}
-        angle={4}
-        objectPosition="50% 50%"
-        zIndex={3}
+        {...layout.posters.white}
       />
       <PosterPanel
         team={red.team}
         player={red.player}
-        left={290}
-        top={760}
-        width={500}
-        height={650}
-        angle={-3}
-        objectPosition="52% 50%"
-        zIndex={4}
+        {...layout.posters.red}
       />
 
       <div
@@ -120,12 +98,12 @@ export const IntroScene: React.FC = () => {
           position: 'absolute',
           left: -35,
           right: -35,
-          top: 1372,
+          top: layout.banner.topAccent.top,
           zIndex: 10,
-          height: 30,
-          rotate: '1deg',
-          backgroundColor: '#1677ff',
-          clipPath: 'polygon(0 22%, 100% 0, 96% 100%, 4% 77%)',
+          height: layout.banner.topAccent.height,
+          rotate: `${layout.banner.topAccent.rotate}deg`,
+          backgroundColor: layout.banner.topAccent.color,
+          clipPath: layout.banner.topAccent.clipPath,
         }}
       />
       <div
@@ -133,12 +111,12 @@ export const IntroScene: React.FC = () => {
           position: 'absolute',
           left: -55,
           right: -55,
-          top: 1390,
+          top: layout.banner.top,
           zIndex: 11,
-          height: 260,
-          rotate: '-2deg',
-          backgroundColor: '#08090a',
-          clipPath: 'polygon(0 9%, 100% 0, 97% 88%, 2% 100%)',
+          height: layout.banner.height,
+          rotate: `${layout.banner.rotate}deg`,
+          background: layout.banner.background,
+          clipPath: layout.banner.clipPath,
           boxShadow: '0 24px 55px rgba(0,0,0,0.42)',
         }}
       />
@@ -147,30 +125,30 @@ export const IntroScene: React.FC = () => {
           position: 'absolute',
           left: -25,
           right: -25,
-          top: 1622,
+          top: layout.banner.bottomAccent.top,
           zIndex: 10,
-          height: 26,
-          rotate: '-3deg',
-          backgroundColor: '#ef3340',
-          clipPath: 'polygon(0 0, 97% 16%, 100% 100%, 4% 72%)',
+          height: layout.banner.bottomAccent.height,
+          rotate: `${layout.banner.bottomAccent.rotate}deg`,
+          backgroundColor: layout.banner.bottomAccent.color,
+          clipPath: layout.banner.bottomAccent.clipPath,
         }}
       />
       <div
         style={{
           position: 'absolute',
-          left: 238,
-          right: 28,
-          top: 1432,
+          left: layout.banner.title.left,
+          right: layout.banner.title.right,
+          top: layout.banner.title.top,
           zIndex: 13,
-          color: '#ffffff',
+          color: layout.banner.title.color,
           fontFamily: ANTON_FONT,
-          fontSize: 162,
+          fontSize: layout.banner.title.fontSize,
           lineHeight: 1,
           fontWeight: 400,
           letterSpacing: 2,
           textAlign: 'center',
-          textShadow: '0 9px 0 rgba(0,0,0,0.58)',
-          rotate: '-2deg',
+          textShadow: layout.banner.title.textShadow,
+          rotate: `${layout.banner.title.rotate}deg`,
         }}
       >
         MATCHDAY
@@ -180,11 +158,12 @@ export const IntroScene: React.FC = () => {
         <div
           style={{
             position: 'absolute',
-            left: 55,
-            top: 1425,
+            left: layout.banner.icon.left,
+            right: layout.banner.icon.right,
+            top: layout.banner.icon.top,
             zIndex: 14,
-            width: 166,
-            height: 166,
+            width: layout.banner.icon.size,
+            height: layout.banner.icon.size,
             padding: 8,
             overflow: 'hidden',
             borderRadius: '50%',
