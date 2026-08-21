@@ -8,11 +8,10 @@ import {
   useCurrentFrame,
 } from 'remotion';
 import {summaryBackground} from '../data/lineup-backgrounds';
+import {playerSummaryAsset} from '../data/player-assets';
 import {weeklyLineup} from '../data/weekly-lineup';
 import {HEEBO_FONT} from '../fonts';
 import type {Lineup, Player, Team} from '../types';
-
-const playerAsset = (player: Player) => player.lineupStatic ?? player.image;
 
 const nameFontSize = (name: string, compact = false) => {
   if (compact) {
@@ -28,7 +27,7 @@ const PlayerCard: React.FC<{
   playerIndex: number;
 }> = ({player, teamIndex, playerIndex}) => {
   const frame = useCurrentFrame();
-  const asset = playerAsset(player);
+  const asset = playerSummaryAsset(player);
   const revealStart = 18 + teamIndex * 8 + playerIndex * 3;
 
   return (
@@ -72,21 +71,17 @@ const PlayerCard: React.FC<{
           fontWeight: 900,
         }}
       >
-        {asset ? (
-          <Img
-            name={`${player.name} portrait`}
-            src={staticFile(asset)}
-            style={{
-              width: '100%',
-              height: '100%',
-              display: 'block',
-              objectFit: 'cover',
-              objectPosition: '50% 20%',
-            }}
-          />
-        ) : (
-          player.name.slice(0, 1)
-        )}
+        <Img
+          name={`${player.name} portrait`}
+          src={staticFile(asset)}
+          style={{
+            width: '100%',
+            height: '100%',
+            display: 'block',
+            objectFit: 'cover',
+            objectPosition: '50% 20%',
+          }}
+        />
       </div>
       <div
         style={{
@@ -235,7 +230,7 @@ const GoalkeeperStrip: React.FC<{players: Player[]}> = ({players}) => {
         שוערים
       </div>
       {players.map((player, playerIndex) => {
-        const asset = playerAsset(player);
+        const asset = playerSummaryAsset(player);
 
         return (
           <div
@@ -257,15 +252,11 @@ const GoalkeeperStrip: React.FC<{players: Player[]}> = ({players}) => {
                 fontWeight: 900,
               }}
             >
-              {asset ? (
-                <Img
-                  name={`${player.name} goalkeeper portrait`}
-                  src={staticFile(asset)}
-                  style={{width: '100%', height: '100%', objectFit: 'cover', objectPosition: '50% 20%'}}
-                />
-              ) : (
-                player.name.slice(0, 1)
-              )}
+              <Img
+                name={`${player.name} goalkeeper portrait`}
+                src={staticFile(asset)}
+                style={{width: '100%', height: '100%', objectFit: 'cover', objectPosition: '50% 20%'}}
+              />
             </div>
             <div
               style={{

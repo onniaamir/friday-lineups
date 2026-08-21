@@ -1,4 +1,5 @@
 import {Easing, Img, interpolate, staticFile, useCurrentFrame} from 'remotion';
+import {playerLineupAsset} from '../data/player-assets';
 import {HEEBO_FONT} from '../fonts';
 import type {Player} from '../types';
 
@@ -12,8 +13,7 @@ export const PlayerMarker: React.FC<{
   startFrame: number;
 }> = ({player, color, darkText, startFrame}) => {
   const frame = useCurrentFrame();
-  const initial = player.name.replace('פלוס ', '+').slice(0, 1);
-  const presentationAsset = player.lineupStatic ?? player.poster ?? player.image;
+  const presentationAsset = playerLineupAsset(player);
 
   return (
     <div
@@ -44,28 +44,10 @@ export const PlayerMarker: React.FC<{
           boxShadow: `0 13px 32px rgba(0,0,0,0.48), 0 0 22px ${color}65`,
         }}
       >
-        {presentationAsset ? (
-          <Img
-            src={staticFile(presentationAsset)}
-            style={{position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover'}}
-          />
-        ) : (
-          <div
-            style={{
-              position: 'absolute',
-              inset: 0,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: darkText ? '#111214' : '#ffffff',
-              fontFamily: HEEBO_FONT,
-              fontSize: 78,
-              fontWeight: 900,
-            }}
-          >
-            <span>{initial}</span>
-          </div>
-        )}
+        <Img
+          src={staticFile(presentationAsset)}
+          style={{position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover'}}
+        />
       </div>
 
       <div

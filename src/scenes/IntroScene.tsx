@@ -1,19 +1,17 @@
 import {AbsoluteFill, Img, staticFile} from 'remotion';
 import {matchdayBackground} from '../data/lineup-backgrounds';
+import {ANONYMOUS_PLAYER_ASSET, playerPosterAsset} from '../data/player-assets';
 import {weeklyLineup} from '../data/weekly-lineup';
 import {ANTON_FONT} from '../fonts';
 import type {Player, Team} from '../types';
-
-const prototypePlayer = weeklyLineup.teams
-  .flatMap((team) => team.players)
-  .find((player) => player.poster ?? player.image);
 
 const selectPlayer = (teamId: string) => {
   const team = weeklyLineup.teams.find((candidate) => candidate.id === teamId) ?? weeklyLineup.teams[0];
   const player =
     team.players.find((candidate) => candidate.poster) ??
+    team.players.find((candidate) => candidate.lineupStatic) ??
     team.players.find((candidate) => candidate.image) ??
-    prototypePlayer;
+    team.players[0];
   return {team, player};
 };
 
@@ -28,7 +26,7 @@ const PosterPanel: React.FC<{
   objectPosition: string;
   zIndex: number;
 }> = ({team, player, left, top, width, height, angle, objectPosition, zIndex}) => {
-  const source = player?.poster ?? player?.image;
+  const source = player ? playerPosterAsset(player) : ANONYMOUS_PLAYER_ASSET;
 
   return (
     <div
@@ -53,20 +51,18 @@ const PosterPanel: React.FC<{
           boxShadow: `0 30px 68px rgba(0,0,0,0.52), 0 0 0 7px rgba(0,0,0,0.78), 0 0 42px ${team.color}cc`,
         }}
       >
-        {source ? (
-          <Img
-            src={staticFile(source)}
-            style={{
-              position: 'absolute',
-              inset: 0,
-              width: '100%',
-              height: '100%',
-              objectFit: 'cover',
-              objectPosition,
-              filter: 'grayscale(0.78) contrast(1.14) saturate(0.42)',
-            }}
-          />
-        ) : null}
+        <Img
+          src={staticFile(source)}
+          style={{
+            position: 'absolute',
+            inset: 0,
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+            objectPosition,
+            filter: 'grayscale(0.78) contrast(1.14) saturate(0.42)',
+          }}
+        />
         <div style={{position: 'absolute', inset: 10, border: `5px solid ${team.color}`}} />
       </div>
     </div>
