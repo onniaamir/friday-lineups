@@ -1,0 +1,32 @@
+{
+  "name": "friday-lineups-graphic",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "studio": "remotion studio --no-open",
+    "render": "remotion render SundayLineups out/sunday-lineups.mp4",
+    "still": "remotion still SundayLineups out/lineup-preview.png --frame=330",
+    "setup:private": "node scripts/setup-private-data.cjs",
+    "sync:player-folders": "node scripts/run-weekly-lineup.cjs sync-player-folders",
+    "typecheck": "tsc --noEmit",
+    "check:public": "node scripts/check-public-release.cjs",
+    "weekly": "node scripts/run-weekly-lineup.cjs",
+    "render:weekly": "node scripts/render-weekly.cjs"
+  },
+  "dependencies": {
+    "@remotion/cli": "4.0.506",
+    "@remotion/fonts": "4.0.506",
+    "@remotion/media": "4.0.506",
+    "@remotion/transitions": "4.0.506",
+    "@remotion/zod-types": "4.0.506",
+    "react": "19.2.4",
+    "react-dom": "19.2.4",
+    "remotion": "4.0.506",
+    "zod": "4.4.3"
+  },
+  "devDependencies": {
+    "@types/react": "19.2.14",
+    "@types/react-dom": "19.2.3",
+    "typescript": "5.9.3"
+  }
+}

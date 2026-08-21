@@ -1,0 +1,4 @@
+interface:
+  display_name: "Generate Friday Lineups"
+  short_description: "Plan, approve, and render weekly lineups"
+  default_prompt: "Use $generate-friday-lineups to plan and render this week’s team reveal from my pasted team lists, including any plus-ones or guests. Communicate in English while preserving player names as written."

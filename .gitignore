@@ -1,0 +1,35 @@
+# Dependencies and generated renders
+/node_modules/
+/out/
+/outputs/
+
+# Canonical local data. This directory must never be published.
+/private-data/
+
+# Runtime links created by `npm run setup:private`.
+/src/data/player-registry.ts
+/src/data/weekly-lineup.ts
+/src/data/final-summary-preview.ts
+/public/private
+/lineups
+
+# Reject the old split private-asset layout as well. Group-specific assets
+# belong under /private-data/assets/ only.
+/public/players/
+/public/audio/
+/public/branding/
+
+# Local configuration and scratch files
+.env
+.env.*
+!.env.example
+*.local
+*.tmp
+
+# Historical working artifacts
+/lineup-template.mp4
+
+# OS/editor files
+.DS_Store
+.idea/
+.vscode/
