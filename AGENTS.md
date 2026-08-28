@@ -72,7 +72,8 @@ on the friend form is the explicit guest ordinal, not a guest count.
 Use the included `generate-friday-lineups` skill when available:
 
 1. Run `npm run setup:private`.
-2. Parse blue, white, red, and optional goalkeeper lists into temporary JSON.
+2. Parse blue, white, red, one captain per team, and optional goalkeeper lists
+   into temporary JSON. Never infer a captain from list order or position.
 3. Run `npm run weekly -- plan ...`.
 4. Present the proposed formation and stop for explicit approval.
 5. Validate requested revisions with `show` using stable player IDs.

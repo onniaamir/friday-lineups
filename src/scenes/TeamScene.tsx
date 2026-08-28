@@ -1,5 +1,6 @@
 import {AbsoluteFill, Easing, Img, interpolate, Sequence, staticFile, useCurrentFrame} from 'remotion';
 import {PlayerMarker} from '../components/PlayerMarker';
+import {CaptainBadge} from '../components/CaptainBadge';
 import {PositionGroupReveal} from '../components/PositionGroupReveal';
 import {optimizeFormation} from '../data/formation';
 import {teamBackgrounds} from '../data/lineup-backgrounds';
@@ -66,7 +67,10 @@ const SubstituteOverlay: React.FC<{players: Player[]; team: Team}> = ({players, 
           const source = playerLineupAsset(player);
 
           return (
-            <div key={player.playerId ?? player.name} style={{width: 178, textAlign: 'center'}}>
+            <div
+              key={player.playerId ?? player.name}
+              style={{position: 'relative', width: 178, textAlign: 'center'}}
+            >
               <div
                 style={{
                   width: 178,
@@ -82,6 +86,11 @@ const SubstituteOverlay: React.FC<{players: Player[]; team: Team}> = ({players, 
               >
                 <Img src={staticFile(source)} style={{width: '100%', height: '100%', objectFit: 'cover'}} />
               </div>
+              {team.captainId === player.playerId ? (
+                <div style={{position: 'absolute', top: 8, right: -13, zIndex: 3, scale: 0.82}}>
+                  <CaptainBadge compact />
+                </div>
+              ) : null}
               <div
                 style={{
                   marginTop: 9,
@@ -142,6 +151,7 @@ export const TeamScene: React.FC<{team: Team}> = ({team}) => {
             color={team.color}
             darkText={darkText}
             startFrame={markerStart(player.position)}
+            isCaptain={team.captainId === player.playerId}
           />
         ))}
       </div>

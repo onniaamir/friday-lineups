@@ -4,6 +4,7 @@ import type {PitchBounds} from '../data/lineup-backgrounds';
 import {playerLineupAsset, playerPosterAsset} from '../data/player-assets';
 import {HEEBO_FONT} from '../fonts';
 import type {Player, Team} from '../types';
+import {CaptainBadge} from './CaptainBadge';
 import {MARKER_HEIGHT, MARKER_WIDTH} from './PlayerMarker';
 
 const largeCardLayout = (count: number, index: number) => {
@@ -162,6 +163,24 @@ export const PositionGroupReveal: React.FC<{
             >
               <PosterArtwork player={player} team={team} playLineupClip />
             </div>
+            {team.captainId === player.playerId ? (
+              <div
+                style={{
+                  position: 'absolute',
+                  top: 28,
+                  right: -13,
+                  zIndex: 3,
+                  scale: players.length === 1 ? 1 : players.length === 2 ? 0.84 : 0.72,
+                  transformOrigin: 'top right',
+                  opacity: interpolate(frame, [4, 14, 65, 75], [0, 1, 1, 0], {
+                    extrapolateLeft: 'clamp',
+                    extrapolateRight: 'clamp',
+                  }),
+                }}
+              >
+                <CaptainBadge showLabel={players.length === 1} />
+              </div>
+            ) : null}
             <div
               dir="rtl"
               style={{

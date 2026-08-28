@@ -47,9 +47,10 @@ team lists plus optional neutral goalkeepers.
 The workflow:
 
 1. Parses pasted aliases and guest notation into temporary JSON.
-2. Resolves permanent players through `private-data/src/player-registry.ts`.
-3. Rejects unknown, ambiguous, or duplicate identities.
-4. Proposes five starters, positions, and substitutes.
+2. Resolves permanent players and the optional captain for each team through
+   `private-data/src/player-registry.ts`.
+3. Rejects unknown, ambiguous, duplicate, or out-of-team captain identities.
+4. Proposes five starters, positions, substitutes, and captains.
 5. Stops for explicit human approval.
 6. Writes the approved active lineup to
    `private-data/src/weekly-lineup.ts`.
@@ -67,6 +68,24 @@ npm run render:weekly -- --date YYYY-MM-DD
 ```
 
 Do not run `apply` until the formation is explicitly approved.
+
+To show captain badges in the reveal and final summary, include all three
+captains in the weekly input. Each value must resolve to a registered player on
+that team:
+
+```json
+{
+  "captains": {
+    "blue": "blue captain alias",
+    "white": "white captain alias",
+    "red": "red captain alias"
+  }
+}
+```
+
+Captain selection is optional for compatibility with older lineups. When
+supplied, the captain is called out in the proposal, rendered with a captain
+badge, and placed first in that team's final-summary row.
 
 ## Player names and aliases
 

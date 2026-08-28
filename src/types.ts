@@ -21,6 +21,7 @@ export type Team = {
   emoji: string;
   color: string;
   accent: string;
+  captainId?: string;
   formationLocked?: boolean;
   players: Player[];
 };

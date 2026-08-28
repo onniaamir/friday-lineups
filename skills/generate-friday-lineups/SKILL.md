@@ -28,7 +28,8 @@ not invent player data, use public examples, or create placeholder registries.
 
 ## Parse the request
 
-Require blue, white, and red team lists. Default goalkeepers to an empty list.
+Require blue, white, and red team lists. Ask for one captain from each team when
+the user has not identified them. Default goalkeepers to an empty list.
 Accept five or more participants per team after guest expansion. Use an
 explicit match date when supplied; otherwise use the upcoming Friday in the
 local timezone, including today when it is Friday.
@@ -43,9 +44,19 @@ Write `/tmp/friday-lineups-input.json`:
     "white": ["pasted player aliases"],
     "red": ["pasted player aliases"]
   },
+  "captains": {
+    "blue": "captain alias from the blue team",
+    "white": "captain alias from the white team",
+    "red": "captain alias from the red team"
+  },
   "goalkeepers": []
 }
 ```
+
+Captains must be registered players who appear on their named team. Preserve
+the supplied captain spelling and let the CLI resolve it exactly like other
+registered-player input. Never infer captains from list order, formation, or
+past weeks.
 
 Preserve `registered player +N`; the CLI expands it to the registered player and
 N temporary guests. Treat `guest of registered player`, `friend of registered
@@ -73,8 +84,9 @@ Run:
 npm run weekly -- plan --input /tmp/friday-lineups-input.json --output /tmp/friday-lineups-plan.json
 ```
 
-The command owns alias resolution, duplicate checks, starter selection,
-substitute selection, missing-artwork reporting, and plan validation.
+The command owns alias resolution, duplicate checks, captain membership,
+starter selection, substitute selection, missing-artwork reporting, and plan
+validation.
 
 ### Resolve an unrecognized or ambiguous name
 
@@ -143,6 +155,7 @@ week-only guest IDs. Preserve:
 - every listed player exactly once within the team;
 - one player in each of `CB`, `LB`, `RB`, `LF`, and `RF`;
 - every remaining player in `substitutes`;
+- each team's approved `captainId` on that same team;
 - the original `playerOrder` unless the roster changes.
 
 Validate and display the revision:

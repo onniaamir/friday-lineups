@@ -23,11 +23,13 @@ type ParticipantInput = string | GuestInput;
 type WeeklyInput = {
   date?: string;
   teams: Record<TeamId, ParticipantInput[]>;
+  captains?: Record<TeamId, string>;
   goalkeepers?: ParticipantInput[];
 };
 type GuestPlan = {id: GuestId; guestOf: PlayerId; displayName: string; positions: OutfieldPosition[]};
 type TeamPlan = {
   id: TeamId;
+  captainId?: ParticipantId;
   playerOrder: ParticipantId[];
   formation: Record<OutfieldPosition, ParticipantId>;
   substitutes: ParticipantId[];
@@ -190,8 +192,19 @@ const buildPlan = (input: WeeklyInput): WeeklyPlan => {
     const formation = Object.fromEntries(
       optimized.starters.map((player) => [player.position, player.playerId]),
     ) as Record<OutfieldPosition, ParticipantId>;
+    const captainInput = input.captains?.[id];
+    if (input.captains && (typeof captainInput !== 'string' || captainInput.trim() === '')) {
+      fail(`${teamDefinitions[id].consoleName} must have a non-empty captain when captains are supplied.`);
+    }
+    const captainId = captainInput
+      ? resolveRegisteredPlayer(captainInput, `${teamDefinitions[id].consoleName} captain`)
+      : undefined;
+    if (captainId && !playerOrder.includes(captainId)) {
+      fail(`${participantName(plan, captainId)} is selected as ${teamDefinitions[id].consoleName} captain but is not on that team.`);
+    }
     return {
       id,
+      captainId,
       playerOrder,
       formation,
       substitutes: optimized.substitutes.map((player) => player.playerId as ParticipantId),
@@ -222,6 +235,9 @@ const validatePlan = (plan: WeeklyPlan) => {
     if (used.some((id) => !participantExists(plan, id))) fail(`${team.id} contains an unknown participant.`);
     if (new Set(used).size !== used.length) fail(`${team.id} uses a participant more than once in its formation.`);
     if (new Set(team.playerOrder).size !== team.playerOrder.length) fail(`${team.id} contains a duplicate participant.`);
+    if (team.captainId && (!participantExists(plan, team.captainId) || !team.playerOrder.includes(team.captainId))) {
+      fail(`${team.id} captain must be one participant on that team.`);
+    }
     if (used.length !== team.playerOrder.length || used.some((id) => !team.playerOrder.includes(id))) {
       fail(`${team.id} formation and substitutes must use every listed participant exactly once.`);
     }
@@ -254,6 +270,7 @@ const printPlan = (plan: WeeklyPlan) => {
   for (const team of plan.teams) {
     const meta = teamDefinitions[team.id];
     console.log(`${meta.emoji} ${meta.consoleName}`);
+    console.log(`Captain: ${team.captainId ? participantName(plan, team.captainId) : 'None'}`);
     console.log(formationLine(plan, team.formation.LF, 'LF', team.formation.RF, 'RF'));
     console.log('');
     console.log(formationLine(plan, team.formation.LB, 'LB', team.formation.RB, 'RB'));
@@ -300,7 +317,7 @@ const generateWeeklySource = (plan: WeeklyPlan) => {
       emoji: ${JSON.stringify(meta.emoji)},
       color: ${JSON.stringify(meta.color)},
       accent: ${JSON.stringify(meta.accent)},
-      formationLocked: true,
+      ${team.captainId ? `captainId: ${JSON.stringify(team.captainId)},\n      ` : ''}formationLocked: true,
       players: [
 ${players.join('\n')}
       ],

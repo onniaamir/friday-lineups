@@ -7,6 +7,7 @@ import {
   staticFile,
   useCurrentFrame,
 } from 'remotion';
+import {CaptainBadge} from '../components/CaptainBadge';
 import {summaryBackground} from '../data/lineup-backgrounds';
 import {playerSummaryAsset} from '../data/player-assets';
 import {weeklyLineup} from '../data/weekly-lineup';
@@ -25,7 +26,8 @@ const PlayerCard: React.FC<{
   player: Player;
   teamIndex: number;
   playerIndex: number;
-}> = ({player, teamIndex, playerIndex}) => {
+  isCaptain?: boolean;
+}> = ({player, teamIndex, playerIndex, isCaptain = false}) => {
   const frame = useCurrentFrame();
   const asset = playerSummaryAsset(player);
   const revealStart = 18 + teamIndex * 8 + playerIndex * 3;
@@ -54,34 +56,47 @@ const PlayerCard: React.FC<{
     >
       <div
         style={{
+          position: 'relative',
           width: 142,
           height: 218,
           flex: '0 0 218px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          overflow: 'hidden',
-          border: '4px solid rgba(255,255,255,0.96)',
-          color: '#f6ce2e',
-          backgroundColor: '#202327',
-          boxShadow: '0 9px 18px rgba(0,0,0,0.34)',
-          clipPath: 'polygon(5% 0, 97% 2%, 100% 94%, 90% 100%, 2% 96%, 0 7%)',
-          fontFamily: HEEBO_FONT,
-          fontSize: 48,
-          fontWeight: 900,
         }}
       >
-        <Img
-          name={`${player.name} portrait`}
-          src={staticFile(asset)}
+        <div
           style={{
-            width: '100%',
-            height: '100%',
-            display: 'block',
-            objectFit: 'cover',
-            objectPosition: '50% 20%',
+            position: 'absolute',
+            inset: 0,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            overflow: 'hidden',
+            border: '4px solid rgba(255,255,255,0.96)',
+            color: '#f6ce2e',
+            backgroundColor: '#202327',
+            boxShadow: '0 9px 18px rgba(0,0,0,0.34)',
+            clipPath: 'polygon(5% 0, 97% 2%, 100% 94%, 90% 100%, 2% 96%, 0 7%)',
+            fontFamily: HEEBO_FONT,
+            fontSize: 48,
+            fontWeight: 900,
           }}
-        />
+        >
+          <Img
+            name={`${player.name} portrait`}
+            src={staticFile(asset)}
+            style={{
+              width: '100%',
+              height: '100%',
+              display: 'block',
+              objectFit: 'cover',
+              objectPosition: '50% 20%',
+            }}
+          />
+        </div>
+        {isCaptain ? (
+          <div style={{position: 'absolute', top: 7, right: -10, zIndex: 3, scale: 0.74}}>
+            <CaptainBadge compact />
+          </div>
+        ) : null}
       </div>
       <div
         style={{
@@ -121,6 +136,11 @@ const rowBackground = (team: Team) => {
 const TeamRow: React.FC<{team: Team; index: number}> = ({team, index}) => {
   const frame = useCurrentFrame();
   const lightTeam = team.id === 'white';
+  const players = [...team.players].sort((left, right) => {
+    const leftIsCaptain = left.playerId === team.captainId;
+    const rightIsCaptain = right.playerId === team.captainId;
+    return Number(rightIsCaptain) - Number(leftIsCaptain);
+  });
 
   return (
     <Interactive.Div
@@ -174,12 +194,13 @@ const TeamRow: React.FC<{team: Team; index: number}> = ({team, index}) => {
           padding: '14px 22px 12px',
         }}
       >
-        {team.players.map((player, playerIndex) => (
+        {players.map((player, playerIndex) => (
           <PlayerCard
             key={`${player.playerId ?? player.name}-${playerIndex}`}
             player={player}
             teamIndex={index}
             playerIndex={playerIndex}
+            isCaptain={player.playerId === team.captainId}
           />
         ))}
       </div>

@@ -2,6 +2,7 @@ import {Easing, Img, interpolate, staticFile, useCurrentFrame} from 'remotion';
 import {playerLineupAsset} from '../data/player-assets';
 import {HEEBO_FONT} from '../fonts';
 import type {Player} from '../types';
+import {CaptainBadge} from './CaptainBadge';
 
 export const MARKER_WIDTH = 176;
 export const MARKER_HEIGHT = 225;
@@ -11,7 +12,8 @@ export const PlayerMarker: React.FC<{
   color: string;
   darkText: boolean;
   startFrame: number;
-}> = ({player, color, darkText, startFrame}) => {
+  isCaptain?: boolean;
+}> = ({player, color, darkText, startFrame, isCaptain = false}) => {
   const frame = useCurrentFrame();
   const presentationAsset = playerLineupAsset(player);
 
@@ -49,6 +51,12 @@ export const PlayerMarker: React.FC<{
           style={{position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover'}}
         />
       </div>
+
+      {isCaptain ? (
+        <div style={{position: 'absolute', top: 7, right: -13, zIndex: 3, scale: 0.82}}>
+          <CaptainBadge compact />
+        </div>
+      ) : null}
 
       <div
         dir="rtl"

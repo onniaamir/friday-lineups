@@ -85,6 +85,10 @@ available ordinal. They require no asset folder or media.
 shape from `src/types.ts`. Normally the weekly skill and CLI generate this file
 after formation approval.
 
+Each team may include a `captainId` matching one of its players' stable IDs.
+The weekly CLI adds it from the approved `captains` input, and the renderer uses
+it for the captain badge and captain-first final-summary order.
+
 The current branding path is:
 
 ```text
