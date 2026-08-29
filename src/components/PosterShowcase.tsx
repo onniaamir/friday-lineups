@@ -9,7 +9,17 @@ export const PosterShowcase: React.FC<{
   title: string;
   backgroundSrc?: string;
   titleTop?: number;
-}> = ({players, team, title, backgroundSrc, titleTop = 78}) => {
+  playLineupClips?: boolean;
+  lineupClipFreezeFrame?: number;
+}> = ({
+  players,
+  team,
+  title,
+  backgroundSrc,
+  titleTop = 78,
+  playLineupClips = false,
+  lineupClipFreezeFrame,
+}) => {
   const frame = useCurrentFrame();
   const cardWidth = players.length === 1 ? 590 : players.length === 2 ? 440 : 310;
   const cardHeight = players.length === 1 ? 1180 : players.length === 2 ? 1080 : 980;
@@ -83,7 +93,13 @@ export const PosterShowcase: React.FC<{
               }),
             }}
           >
-            <PosterArtwork player={player} team={team} showEmbeddedName />
+            <PosterArtwork
+              player={player}
+              team={team}
+              showEmbeddedName
+              playLineupClip={playLineupClips}
+              lineupClipFreezeFrame={lineupClipFreezeFrame}
+            />
           </div>
         ))}
       </div>

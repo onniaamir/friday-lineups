@@ -221,15 +221,16 @@ const GoalkeeperStrip: React.FC<{players: Player[]}> = ({players}) => {
       style={{
         position: 'absolute',
         left: '50%',
-        bottom: 52,
+        bottom: 34,
         zIndex: 6,
-        minWidth: 510,
-        minHeight: 144,
+        minWidth: 410,
+        minHeight: 408,
         display: 'flex',
+        flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        gap: 26,
-        padding: '18px 34px',
+        gap: 14,
+        padding: '20px 34px 24px',
         color: '#f7f3ea',
         backgroundColor: 'rgba(8,10,12,0.96)',
         borderTop: '7px solid #f1ca2c',
@@ -247,53 +248,61 @@ const GoalkeeperStrip: React.FC<{players: Player[]}> = ({players}) => {
       }}
       dir="rtl"
     >
-      <div style={{fontFamily: HEEBO_FONT, color: '#f1ca2c', fontSize: 34, fontWeight: 900}}>
+      <div style={{fontFamily: HEEBO_FONT, color: '#f1ca2c', fontSize: 40, lineHeight: 1, fontWeight: 900}}>
         שוערים
       </div>
-      {players.map((player, playerIndex) => {
-        const asset = playerSummaryAsset(player);
+      <div style={{display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 20}}>
+        {players.map((player, playerIndex) => {
+          const asset = playerSummaryAsset(player);
 
-        return (
-          <div
-            key={`${player.playerId ?? player.name}-${playerIndex}`}
-            style={{display: 'flex', alignItems: 'center', gap: 10}}
-          >
+          return (
             <div
+              key={`${player.playerId ?? player.name}-${playerIndex}`}
               style={{
-                width: 76,
-                height: 76,
+                width: 190,
+                height: 296,
                 display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                overflow: 'hidden',
-                borderRadius: '50%',
-                border: '4px solid #f1ca2c',
-                backgroundColor: '#262a2f',
-                fontSize: 32,
-                fontWeight: 900,
+                flexDirection: 'column',
+                alignItems: 'stretch',
+                gap: 8,
               }}
             >
-              <Img
-                name={`${player.name} goalkeeper portrait`}
-                src={staticFile(asset)}
-                style={{width: '100%', height: '100%', objectFit: 'cover', objectPosition: '50% 20%'}}
-              />
+              <div
+                style={{
+                  width: 190,
+                  height: 244,
+                  overflow: 'hidden',
+                  border: '5px solid #f1ca2c',
+                  backgroundColor: '#262a2f',
+                  boxShadow: '0 12px 26px rgba(0,0,0,0.5)',
+                  clipPath: 'polygon(5% 0, 97% 2%, 100% 94%, 90% 100%, 2% 96%, 0 7%)',
+                }}
+              >
+                <Img
+                  name={`${player.name} goalkeeper card`}
+                  src={staticFile(asset)}
+                  style={{width: '100%', height: '100%', objectFit: 'cover', objectPosition: '50% 20%'}}
+                />
+              </div>
+              <div
+                style={{
+                  height: 44,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontFamily: HEEBO_FONT,
+                  fontSize: nameFontSize(player.name, true),
+                  lineHeight: 1,
+                  fontWeight: 800,
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                {player.name}
+              </div>
             </div>
-            <div
-              style={{
-                maxWidth: 150,
-                fontFamily: HEEBO_FONT,
-                fontSize: nameFontSize(player.name, true),
-                lineHeight: 1,
-                fontWeight: 800,
-                whiteSpace: 'nowrap',
-              }}
-            >
-              {player.name}
-            </div>
-          </div>
-        );
-      })}
+          );
+        })}
+      </div>
     </Interactive.Div>
   );
 };

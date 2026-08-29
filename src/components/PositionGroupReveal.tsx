@@ -1,5 +1,5 @@
 import {Video} from '@remotion/media';
-import {AbsoluteFill, Easing, Img, interpolate, staticFile, useCurrentFrame} from 'remotion';
+import {AbsoluteFill, Easing, Freeze, Img, interpolate, staticFile, useCurrentFrame} from 'remotion';
 import type {PitchBounds} from '../data/lineup-backgrounds';
 import {playerLineupAsset, playerPosterAsset} from '../data/player-assets';
 import {HEEBO_FONT} from '../fonts';
@@ -25,33 +25,49 @@ const PosterArtwork: React.FC<{
   compact?: boolean;
   showEmbeddedName?: boolean;
   playLineupClip?: boolean;
+  lineupClipFreezeFrame?: number;
 }> = ({
   player,
   team,
   compact = false,
   showEmbeddedName = false,
   playLineupClip = false,
+  lineupClipFreezeFrame,
 }) => {
   const frame = useCurrentFrame();
   const stillAsset = playLineupClip ? playerLineupAsset(player) : playerPosterAsset(player);
-  const showClip = playLineupClip && player.lineupClip && frame < 73;
+  const showClip =
+    playLineupClip && player.lineupClip && (lineupClipFreezeFrame !== undefined || frame < 73);
+
+  const lineupVideo = showClip ? (
+    <Video
+      src={staticFile(player.lineupClip!)}
+      muted
+      objectFit="cover"
+      style={{
+        position: 'absolute',
+        inset: 0,
+        width: '100%',
+        height: '100%',
+        objectPosition: '50% 50%',
+        filter: 'contrast(1.12) saturate(0.9)',
+      }}
+    />
+  ) : null;
 
   return (
     <>
       {showClip ? (
-        <Video
-          src={staticFile(player.lineupClip!)}
-          muted
-          objectFit="cover"
-          style={{
-            position: 'absolute',
-            inset: 0,
-            width: '100%',
-            height: '100%',
-            objectPosition: '50% 50%',
-            filter: 'contrast(1.12) saturate(0.9)',
-          }}
-        />
+        lineupClipFreezeFrame === undefined ? (
+          lineupVideo
+        ) : (
+          <Freeze
+            frame={lineupClipFreezeFrame}
+            active={(currentFrame) => currentFrame > lineupClipFreezeFrame}
+          >
+            {lineupVideo}
+          </Freeze>
+        )
       ) : (
         <Img
           src={staticFile(stillAsset)}

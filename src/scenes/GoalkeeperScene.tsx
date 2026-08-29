@@ -21,6 +21,8 @@ export const GoalkeeperScene: React.FC<{goalkeepers: Player[]}> = ({goalkeepers}
         title="שוערים"
         titleTop={150}
         backgroundSrc={summaryBackground}
+        playLineupClips
+        lineupClipFreezeFrame={76}
       />
     </AbsoluteFill>
   );
