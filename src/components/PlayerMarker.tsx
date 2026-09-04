@@ -42,7 +42,7 @@ export const PlayerMarker: React.FC<{
           borderRadius: 13,
           color: darkText ? '#111214' : '#ffffff',
           background: `linear-gradient(155deg, ${color}, #101113 82%)`,
-          border: '5px solid rgba(255,255,255,0.96)',
+          border: `5px solid ${color}`,
           boxShadow: `0 13px 32px rgba(0,0,0,0.48), 0 0 22px ${color}65`,
         }}
       >

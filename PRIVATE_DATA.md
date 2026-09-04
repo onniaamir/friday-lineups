@@ -22,7 +22,10 @@ private-data/
 │   │   └── group-icon.png
 │   └── audio/
 │       ├── lineup-theme.mp3
-│       └── lineup-theme-trimmed.mp3
+│       ├── lineup-theme-trimmed.mp3
+│       └── weekly/
+│           ├── track-01.mp3
+│           └── track-02.mp3
 ├── attendance/
 ├── lineups/
 ├── outputs/
@@ -33,6 +36,24 @@ The three TypeScript files, trimmed soundtrack, and group icon are required by
 the current implementation. Player files are optional because missing artwork
 uses placeholders. The untrimmed soundtrack, attendance, outputs, and archive
 folders are organizational and are not read automatically by the renderer.
+
+## Weekly soundtrack rotation
+
+Save additional background tracks in `private-data/assets/audio/weekly/` as
+MP3, M4A, or WAV files. The original `lineup-theme-trimmed.mp3` remains in the
+rotation as the fallback track. When a weekly plan is created, the planner
+selects a track deterministically from the match date and stores that path in
+the approved plan, so rerendering the same plan uses the same song.
+
+Optional per-track start offsets live in
+`private-data/assets/audio/soundtrack-offsets.json`. Keys are paths relative to
+the audio folder and values are seconds to skip, for example:
+
+```json
+{
+  "weekly/track-01.mp3": 2.4
+}
+```
 
 ## Player registry
 

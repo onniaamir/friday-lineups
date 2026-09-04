@@ -126,8 +126,12 @@ export const TeamScene: React.FC<{team: Team}> = ({team}) => {
   const background = teamBackgrounds[team.id] ?? teamBackgrounds.blue;
   const {starters, substitutes} = optimizeFormation(team.players, team.formationLocked);
   const centerBack = starters.filter((player) => player.position === 'CB');
-  const wideDefenders = starters.filter((player) => player.position === 'LB' || player.position === 'RB');
-  const forwards = starters.filter((player) => player.position === 'LF' || player.position === 'RF');
+  const wideDefenders = starters
+    .filter((player) => player.position === 'LB' || player.position === 'RB')
+    .sort((left, right) => left.x - right.x);
+  const forwards = starters
+    .filter((player) => player.position === 'LF' || player.position === 'RF')
+    .sort((left, right) => left.x - right.x);
 
   return (
     <AbsoluteFill style={{overflow: 'hidden', fontFamily: HEEBO_FONT}}>

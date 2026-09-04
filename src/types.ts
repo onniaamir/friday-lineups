@@ -22,6 +22,7 @@ export type Team = {
   color: string;
   accent: string;
   captainId?: string;
+  introPlayerId?: string;
   formationLocked?: boolean;
   players: Player[];
 };
@@ -34,6 +35,8 @@ export type Lineup = {
   temperature: string;
   weatherLabel: string;
   groupIcon?: string;
+  soundtrack?: string;
+  soundtrackStartAtSeconds?: number;
   goalkeepers: Player[];
   teams: Team[];
 };

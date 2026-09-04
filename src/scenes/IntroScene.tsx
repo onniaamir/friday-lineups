@@ -9,6 +9,7 @@ import type {Player, Team} from '../types';
 const selectPlayer = (teamId: string) => {
   const team = weeklyLineup.teams.find((candidate) => candidate.id === teamId) ?? weeklyLineup.teams[0];
   const player =
+    team.players.find((candidate) => candidate.playerId === team.introPlayerId) ??
     team.players.find((candidate) => candidate.poster) ??
     team.players.find((candidate) => candidate.lineupStatic) ??
     team.players.find((candidate) => candidate.image) ??

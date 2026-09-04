@@ -30,11 +30,20 @@ type GuestPlan = {id: GuestId; guestOf: PlayerId; displayName: string; positions
 type TeamPlan = {
   id: TeamId;
   captainId?: ParticipantId;
+  introPlayerId?: ParticipantId;
   playerOrder: ParticipantId[];
   formation: Record<OutfieldPosition, ParticipantId>;
   substitutes: ParticipantId[];
 };
-type WeeklyPlan = {version: 2; date: string; guests: GuestPlan[]; teams: TeamPlan[]; goalkeepers: ParticipantId[]};
+type WeeklyPlan = {
+  version: 2;
+  date: string;
+  soundtrack?: string;
+  soundtrackStartAtSeconds?: number;
+  guests: GuestPlan[];
+  teams: TeamPlan[];
+  goalkeepers: ParticipantId[];
+};
 type LegacyWeeklyPlan = {
   version: 1;
   date: string;
@@ -48,6 +57,30 @@ type LegacyWeeklyPlan = {
 };
 
 const fail = (message: string): never => { throw new Error(message); };
+const defaultSoundtrack = 'private/audio/lineup-theme-trimmed.mp3';
+const weeklySoundtrackDirectory = path.join(projectRoot, 'private-data/assets/audio/weekly');
+const soundtrackOffsetsPath = path.join(projectRoot, 'private-data/assets/audio/soundtrack-offsets.json');
+const soundtrackStartAtSeconds = (soundtrack: string) => {
+  if (!fs.existsSync(soundtrackOffsetsPath)) return 0;
+  const offsets = JSON.parse(fs.readFileSync(soundtrackOffsetsPath, 'utf8')) as Record<string, unknown>;
+  const relativePath = soundtrack.replace(/^private\/audio\//, '');
+  const offset = offsets[relativePath] ?? 0;
+  if (typeof offset !== 'number' || !Number.isFinite(offset) || offset < 0) {
+    fail(`Invalid soundtrack start offset for ${relativePath}.`);
+  }
+  return offset;
+};
+const selectSoundtrack = (date: string) => {
+  const weeklyTracks = fs.existsSync(weeklySoundtrackDirectory)
+    ? fs.readdirSync(weeklySoundtrackDirectory, {withFileTypes: true})
+      .filter((entry) => entry.isFile() && ['.mp3', '.m4a', '.wav'].includes(path.extname(entry.name).toLowerCase()))
+      .map((entry) => `private/audio/weekly/${entry.name}`)
+      .sort((left, right) => left.localeCompare(right, 'en'))
+    : [];
+  const tracks = [defaultSoundtrack, ...weeklyTracks];
+  const week = Math.floor(Date.parse(`${date}T00:00:00Z`) / (7 * 24 * 60 * 60 * 1000));
+  return tracks[((week % tracks.length) + tracks.length) % tracks.length];
+};
 const parseArgs = () => {
   const [command, ...rest] = process.argv.slice(2);
   const values = new Map<string, string>();
@@ -77,7 +110,15 @@ const normalizePlan = (plan: WeeklyPlan | LegacyWeeklyPlan): WeeklyPlan => {
   if (plan.version !== 1) fail(`Unsupported plan version: ${String((plan as {version?: unknown}).version)}`);
   return {version: 2, date: plan.date, guests: [], teams: plan.teams, goalkeepers: plan.goalkeepers};
 };
-const readPlan = (filePath: string) => normalizePlan(readJson<WeeklyPlan | LegacyWeeklyPlan>(filePath));
+const readPlan = (filePath: string) => {
+  const plan = normalizePlan(readJson<WeeklyPlan | LegacyWeeklyPlan>(filePath));
+  const soundtrack = plan.soundtrack ?? selectSoundtrack(plan.date);
+  return {
+    ...plan,
+    soundtrack,
+    soundtrackStartAtSeconds: plan.soundtrackStartAtSeconds ?? soundtrackStartAtSeconds(soundtrack),
+  };
+};
 
 const formatMatches = (matches: PlayerId[]) =>
   matches.map((id) => `${playerRegistry[id].displayName} [${id}]`).join(', ');
@@ -182,7 +223,17 @@ const buildPlan = (input: WeeklyInput): WeeklyPlan => {
   if (!input.teams) fail('Input must contain teams.blue, teams.white, and teams.red.');
   const guests: GuestPlan[] = [];
   const guestCounts = new Map<PlayerId, number>();
-  const plan: WeeklyPlan = {version: 2, date: validateDate(input.date ?? upcomingFriday()), guests, teams: [], goalkeepers: []};
+  const date = validateDate(input.date ?? upcomingFriday());
+  const soundtrack = selectSoundtrack(date);
+  const plan: WeeklyPlan = {
+    version: 2,
+    date,
+    soundtrack,
+    soundtrackStartAtSeconds: soundtrackStartAtSeconds(soundtrack),
+    guests,
+    teams: [],
+    goalkeepers: [],
+  };
   plan.teams = (Object.keys(teamDefinitions) as TeamId[]).map((id) => {
     const inputs = input.teams[id];
     if (!Array.isArray(inputs)) fail(`${teamDefinitions[id].consoleName} must be an array.`);
@@ -218,6 +269,18 @@ const buildPlan = (input: WeeklyInput): WeeklyPlan => {
 const validatePlan = (plan: WeeklyPlan) => {
   if (plan.version !== 2) fail(`Unsupported plan version: ${String(plan.version)}`);
   validateDate(plan.date);
+  if (plan.soundtrack) {
+    const audioRoot = path.resolve(projectRoot, 'private-data/assets/audio');
+    const relativeSoundtrack = plan.soundtrack.slice('private/audio/'.length);
+    const soundtrackPath = path.resolve(audioRoot, relativeSoundtrack);
+    if (!plan.soundtrack.startsWith('private/audio/') || !soundtrackPath.startsWith(`${audioRoot}${path.sep}`) || !fs.existsSync(soundtrackPath)) {
+      fail(`Soundtrack is missing or outside private/audio: ${plan.soundtrack}`);
+    }
+  }
+  if (plan.soundtrackStartAtSeconds !== undefined &&
+      (!Number.isFinite(plan.soundtrackStartAtSeconds) || plan.soundtrackStartAtSeconds < 0)) {
+    fail('soundtrackStartAtSeconds must be a non-negative number.');
+  }
   const expectedTeams = new Set(Object.keys(teamDefinitions));
   const seenGuests = new Set<GuestId>();
   for (const guest of plan.guests) {
@@ -237,6 +300,9 @@ const validatePlan = (plan: WeeklyPlan) => {
     if (new Set(team.playerOrder).size !== team.playerOrder.length) fail(`${team.id} contains a duplicate participant.`);
     if (team.captainId && (!participantExists(plan, team.captainId) || !team.playerOrder.includes(team.captainId))) {
       fail(`${team.id} captain must be one participant on that team.`);
+    }
+    if (team.introPlayerId && (!participantExists(plan, team.introPlayerId) || !team.playerOrder.includes(team.introPlayerId))) {
+      fail(`${team.id} intro poster player must be one participant on that team.`);
     }
     if (used.length !== team.playerOrder.length || used.some((id) => !team.playerOrder.includes(id))) {
       fail(`${team.id} formation and substitutes must use every listed participant exactly once.`);
@@ -267,10 +333,13 @@ const formationLine = (plan: WeeklyPlan, left: ParticipantId, leftPosition: stri
   `        ${participantName(plan, left)} (${leftPosition})          ${participantName(plan, right)} (${rightPosition})`;
 const printPlan = (plan: WeeklyPlan) => {
   console.log(`\nProposed lineups — ${plan.date}\n`);
+  console.log(`Soundtrack: ${plan.soundtrack ?? selectSoundtrack(plan.date)}\n`);
+  console.log(`Soundtrack starts at: ${plan.soundtrackStartAtSeconds ?? 0}s\n`);
   for (const team of plan.teams) {
     const meta = teamDefinitions[team.id];
     console.log(`${meta.emoji} ${meta.consoleName}`);
     console.log(`Captain: ${team.captainId ? participantName(plan, team.captainId) : 'None'}`);
+    console.log(`Intro poster: ${team.introPlayerId ? participantName(plan, team.introPlayerId) : 'Automatic'}`);
     console.log(formationLine(plan, team.formation.LF, 'LF', team.formation.RF, 'RF'));
     console.log('');
     console.log(formationLine(plan, team.formation.LB, 'LB', team.formation.RB, 'RB'));
@@ -318,7 +387,7 @@ const generateWeeklySource = (plan: WeeklyPlan) => {
       color: ${JSON.stringify(meta.color)},
       accent: ${JSON.stringify(meta.accent)},
       ${team.captainId ? `captainId: ${JSON.stringify(team.captainId)},\n      ` : ''}formationLocked: true,
-      players: [
+      ${team.introPlayerId ? `introPlayerId: ${JSON.stringify(team.introPlayerId)},\n      ` : ''}players: [
 ${players.join('\n')}
       ],
     }`;
@@ -336,6 +405,8 @@ export const weeklyLineup: Lineup = {
   temperature: '',
   weatherLabel: '',
   groupIcon: 'private/branding/group-icon.png',
+  soundtrack: ${JSON.stringify(plan.soundtrack ?? selectSoundtrack(plan.date))},
+  soundtrackStartAtSeconds: ${JSON.stringify(plan.soundtrackStartAtSeconds ?? 0)},
   goalkeepers: [
 ${goalkeepers.join('\n')}
   ],

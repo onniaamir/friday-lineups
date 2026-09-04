@@ -16,6 +16,7 @@ export const GOALKEEPER_SCENE_DURATION = 90;
 // The closing animation gets eight seconds with music, followed by a silent
 // fifteen-second hold so the final rosters can be read without pausing.
 export const ACTIVE_FINAL_SCENE_DURATION = 240;
+export const MUSIC_FADE_OUT_DURATION = 5 * FPS;
 export const SILENT_SUMMARY_HOLD_DURATION = 15 * FPS;
 export const FINAL_SCENE_DURATION =
   ACTIVE_FINAL_SCENE_DURATION + SILENT_SUMMARY_HOLD_DURATION;

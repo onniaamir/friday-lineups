@@ -7,6 +7,7 @@ const resolve = (relativePath) => path.join(root, relativePath);
 
 for (const directory of [
   'private-data/assets/audio',
+  'private-data/assets/audio/weekly',
   'private-data/assets/branding',
   'private-data/assets/players',
   'private-data/attendance',
