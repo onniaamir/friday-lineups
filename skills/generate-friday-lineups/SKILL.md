@@ -1,6 +1,6 @@
 ---
 name: generate-friday-lineups
-description: Plan, approve, and render this repository's weekly vertical Remotion lineup video from pasted blue, white, and red team lists, temporary guests, and optional neutral goalkeepers. Use when the user provides weekly football teams, mentions a player plus-one, guest, or friend marker such as חבר followed by a player name, asks for a Friday lineup or team-reveal video, or invokes $generate-friday-lineups. Communicate in English, explicitly resolve unknown or ambiguous identities as an existing alias, permanent new player, or week-only guest, require formation approval, then create the WhatsApp-compatible MP4.
+description: Plan, approve, and render this repository's weekly vertical Remotion lineup video from pasted blue, white, and red team lists, temporary guests, and optional neutral goalkeepers. Use when the user provides weekly football teams, mentions a player plus-one, guest, or friend marker such as חבר followed by a player name, asks for a Friday lineup or team-reveal video, or invokes $generate-friday-lineups. Communicate in English, explicitly resolve unknown or ambiguous identities as an existing alias, permanent new player, or week-only guest, require formation and intro-poster player approval, then create the WhatsApp-compatible MP4.
 ---
 
 # Generate Friday Lineups
@@ -166,10 +166,53 @@ npm run weekly -- show --plan /tmp/friday-lineups-plan.json
 
 Stop again for explicit approval. A revision request is not approval.
 
+## Approve the intro poster players
+
+After formation approval and before `apply` or rendering, propose exactly one
+intro poster player from each team. This is a separate mandatory approval
+checkpoint; formation approval does not approve the poster players.
+
+Read the current plan, `private-data/src/player-registry.ts`, the corresponding
+files under `private-data/assets/players/`, and prior dated plans in
+`private-data/lineups/`. For each current team, list every registered teammate
+with at least one existing still-image file referenced by `poster`,
+`lineupStatic`, or `image`. Show the exact available media types beside each
+name. Do not count a registry path whose file is missing, a `lineupClip` by
+itself, a guest, goalkeeper, or player from another team as an eligible option.
+
+Recommend one eligible player per team. Favor a player who has never appeared
+as an archived `introPlayerId`; otherwise favor the player used least recently,
+using fewer total appearances as a tie-breaker. Avoid repeating any player from
+the most recent archived week when that team has another eligible option. Use
+current plan order only as the final tie-breaker. Archives without an explicit
+`introPlayerId` do not establish who appeared and must not be treated as poster
+history.
+
+Present the three recommendations first, followed by all other eligible options
+for each team and their available media types. Explain that the intro uses
+`poster` first, then `lineupStatic`, then `image`. Stop and ask the user to
+approve all three players or name replacements. Do not silently accept the
+automatic renderer fallback, and do not run `apply` or render before this
+approval.
+
+After approval, write each selected registered stable ID to that team's
+`introPlayerId` in `/tmp/friday-lineups-plan.json`. Run:
+
+```bash
+npm run weekly -- show --plan /tmp/friday-lineups-plan.json
+```
+
+Confirm that the output names the three approved intro poster players and that
+the formation, captains, substitutes, guests, soundtrack, and goalkeepers are
+unchanged. If it differs, stop and correct the plan. When it matches, the
+poster-player approval authorizes these three `introPlayerId` edits without a
+third approval checkpoint.
+
 ## Apply and render
 
-Proceed only after explicit approval. If the draft plan is unavailable, ask for
-the teams again.
+Proceed only after explicit formation approval and explicit approval of all
+three intro poster players. If the draft plan is unavailable, ask for the teams
+again.
 
 Run:
 
