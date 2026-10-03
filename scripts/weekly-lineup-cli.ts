@@ -60,6 +60,7 @@ const fail = (message: string): never => { throw new Error(message); };
 const defaultSoundtrack = 'private/audio/lineup-theme-trimmed.mp3';
 const weeklySoundtrackDirectory = path.join(projectRoot, 'private-data/assets/audio/weekly');
 const soundtrackOffsetsPath = path.join(projectRoot, 'private-data/assets/audio/soundtrack-offsets.json');
+const archivedLineupsDirectory = path.join(projectRoot, 'private-data/lineups');
 const soundtrackStartAtSeconds = (soundtrack: string) => {
   if (!fs.existsSync(soundtrackOffsetsPath)) return 0;
   const offsets = JSON.parse(fs.readFileSync(soundtrackOffsetsPath, 'utf8')) as Record<string, unknown>;
@@ -78,6 +79,21 @@ const selectSoundtrack = (date: string) => {
       .sort((left, right) => left.localeCompare(right, 'en'))
     : [];
   const tracks = [defaultSoundtrack, ...weeklyTracks];
+  const archivedDates = fs.existsSync(archivedLineupsDirectory)
+    ? fs.readdirSync(archivedLineupsDirectory)
+      .filter((name) => /^\d{4}-\d{2}-\d{2}\.json$/.test(name) && name.slice(0, 10) <= date)
+      .sort((left, right) => right.localeCompare(left, 'en'))
+    : [];
+  for (const name of archivedDates) {
+    const archived = JSON.parse(fs.readFileSync(path.join(archivedLineupsDirectory, name), 'utf8')) as {soundtrack?: unknown};
+    if (typeof archived.soundtrack !== 'string') continue;
+    if (name.slice(0, 10) === date && tracks.includes(archived.soundtrack)) return archived.soundtrack;
+    if (name.slice(0, 10) < date) {
+      const previousIndex = tracks.indexOf(archived.soundtrack);
+      if (previousIndex >= 0) return tracks[(previousIndex + 1) % tracks.length];
+      return tracks.find((track) => track.localeCompare(archived.soundtrack as string, 'en') > 0) ?? tracks[0];
+    }
+  }
   const week = Math.floor(Date.parse(`${date}T00:00:00Z`) / (7 * 24 * 60 * 60 * 1000));
   return tracks[((week % tracks.length) + tracks.length) % tracks.length];
 };

@@ -42,8 +42,11 @@ folders are organizational and are not read automatically by the renderer.
 Save additional background tracks in `private-data/assets/audio/weekly/` as
 MP3, M4A, or WAV files. The original `lineup-theme-trimmed.mp3` remains in the
 rotation as the fallback track. When a weekly plan is created, the planner
-selects a track deterministically from the match date and stores that path in
-the approved plan, so rerendering the same plan uses the same song.
+selects the song after the most recently archived song in alphabetical order,
+wrapping around at the end. A plan for an already archived date keeps its song.
+If no earlier archive records a song, the match date determines the starting
+song. The chosen path is stored in the approved plan, so rerendering uses the
+same song even if the pool changes later.
 
 Optional per-track start offsets live in
 `private-data/assets/audio/soundtrack-offsets.json`. Keys are paths relative to
