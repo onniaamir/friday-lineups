@@ -139,7 +139,9 @@ Registry validation is allowed before a proposal; do not apply or render a
 formation without the separate approval below.
 
 Present the printed formation in a fenced text block so spacing remains
-readable.
+readable. Read the generated plan and explicitly name the selected song and its
+start offset in seconds beside the formation proposal. Use the song's filename
+for a recognizable name; do not predict the selection from the date alone.
 
 ### Require approval
 
@@ -212,7 +214,9 @@ third approval checkpoint.
 
 Proceed only after explicit formation approval and explicit approval of all
 three intro poster players. If the draft plan is unavailable, ask for the teams
-again.
+again. Immediately before `apply` and rendering, read the final plan and state
+which song will play and its start offset. If either differs from the approved
+proposal, show the change and get approval before rendering.
 
 Run:
 
